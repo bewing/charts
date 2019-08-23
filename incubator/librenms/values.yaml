@@ -1,0 +1,99 @@
+# Default values for librenms.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+nameOverride: ""
+fullnameOverride: ""
+
+tz: UTC
+uid: 1000
+gid: 1000
+
+gui:
+  replicaCount: 1
+
+  username: librenms
+  # Set password to override random generation
+  # password
+  uploadMaxSize: 16M
+  nginx:
+    image:
+      repository: librenms/librenms
+      tag: "1.54"
+      pullPolicy: IfNotPresent
+    realIpFrom: 0.0.0.0/32
+    realIpHeader: X-Forwarded-For
+    logIpVar: remote_addr
+  php7fpm:
+    image:
+      repository: librenms/librenms
+      tag: "1.54"
+      pullPolicy: IfNotPresent
+    opcacheMemSize: 128
+    memoryLimit: 256M
+
+poller:
+  threads: 16
+  interval: 5
+  discovery: true
+  daily:
+  distributed:
+    enabled: false
+
+externalDatabase:
+  host:
+  port: 3306
+  user: librenms
+  password: 
+  database: librenms
+
+mariadb:
+  ## Whether to deploy a mariadb server to satisfy the applications database requirements.
+  ## To use an external database set this to false and configure the externalDatabase parameters
+  enabled: true
+  replication:
+    enabled: false
+  db:
+    user: librenms
+    name: librenms
+  master:
+    persistence:
+      enabled: false
+      storageClass: "-"
+      accessMode: ReadWriteOnce
+      size: 8Gi
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  paths: []
+  hosts:
+    - chart-example.local
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

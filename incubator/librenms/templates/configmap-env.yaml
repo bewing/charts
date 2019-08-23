@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-%s" (include "librenms.fullname" .) "env" }}
+  labels:
+    app.kubernetes.io/name: {{ template "librenms.name" . }}
+    helm.sh/chart: {{ template "librenms.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+data:
+  {{- if .Values.mariadb.enabled }}
+  DB_HOST: {{ (include "librenms.mariadb.fullname" .) | quote }}
+  DB_PORT: {{ .Values.mariadb.service.port | quote }}
+  DB_USER: {{ .Values.mariadb.db.user | quote }}
+  DB_NAME: {{ .Values.mariadb.db.name | quote }}
+  {{- else }}
+  DB_HOST: {{ .Values.externalDatabase.host | quote }}
+  DB_PORT: {{ .Values.externalDatabase.port | quote }}
+  DB_USER: {{ .Values.mariadb.db.user | quote }}
+  DB_NAME: {{ .Values.externalDatabase.name | quote }}
+  {{- end }}

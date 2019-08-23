@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-%s" (include "librenms.fullname" . ) "php7-fpm"}}
+  labels:
+    app.kubernetes.io/name: {{ template "librenms.name" . }}
+    helm.sh/chart: {{ template "librenms.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+data:
+  www.conf: |-
+{{ tpl (.Files.Get "files/www.conf") . | indent 4 }}
+  librenms-php.ini: |-
+{{ tpl (.Files.Get "files/librenms-php.ini") . | indent 4 }}

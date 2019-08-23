@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-%s" (include "librenms.fullname" . ) "nginx"}}
+  labels:
+    app.kubernetes.io/name: {{ template "librenms.name" . }}
+    helm.sh/chart: {{ template "librenms.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+data:
+  nginx.conf: |-
+{{ tpl (.Files.Get "files/nginx.conf") . | indent 4 }}

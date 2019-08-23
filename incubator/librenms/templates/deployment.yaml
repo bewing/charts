@@ -1,0 +1,146 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "librenms.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "librenms.name" . }}
+    helm.sh/chart: {{ include "librenms.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.gui.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "librenms.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "librenms.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ printf "%s-%s" .Chart.Name "nginx" }}
+          image: {{ printf "%s:%s" .Values.gui.nginx.image.repository .Values.gui.nginx.image.tag | quote }}
+          imagePullPolicy: {{ .Values.gui.nginx.image.pullPolicy }}
+          command: ["nginx"]
+          args: ["-g", "daemon off;"]
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 120
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+          resources:
+            {{- toYaml .Values.gui.nginx.resources | nindent 12 }}
+        - name: {{ printf "%s-%s" .Chart.Name "php7-fpm" }}
+          image: {{ printf "%s:%s" .Values.gui.php7fpm.image.repository .Values.gui.php7fpm.image.tag }}
+          imagePullPolicy: {{ .Values.gui.php7fpm.image.pullPolicy }}
+          command: ["php-fpm7"]
+          args: ["-F", "-O"]
+          ports:
+            - name: php-fpm
+              containerPort: 9000
+              protocol: TCP
+          envFrom:
+          - configMapRef:
+              name: {{ printf "%s-%s" (include "librenms.fullname" . ) "env" }}
+          env:
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                {{- if .Values.mariadb.enabled }}
+                name: {{ template "librenms.mariadb.fullname" . }}
+                {{- else }}
+                name: {{ .Values.externalDatabase.password }}
+                {{ end }}
+                key: mariadb-password
+          - name: APP_KEY
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "librenms.fullname" . }}
+                key: app-key
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: librenms-config
+              mountPath: /opt/librenms/config.d
+            - name: php7-fpm-config
+              mountPath: /etc/php7/php-fpm.d/www.conf
+              subPath: www.conf
+      initContainers:
+        - name: init
+          image: {{ printf "%s:%s" .Values.gui.php7fpm.image.repository .Values.gui.php7fpm.image.tag }}
+          imagePullPolicy: {{ .Values.gui.php7fpm.image.pullPolicy }}
+          command: ["/media/init.sh"]
+          envFrom:
+            - configMapRef:
+                name: {{ printf "%s-%s" (include "librenms.fullname" . ) "env" }}
+          env:
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.mariadb.enabled }}
+                  name: {{ template "librenms.mariadb.fullname" . }}
+                  {{- else }}
+                  name: {{ .Values.externalDatabase.password }}
+                  {{ end }}
+                  key: mariadb-password
+            - name: GUI_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ printf "%s-%s" (include "librenms.fullname" . ) "init" }}
+                  key: username
+            - name: GUI_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "librenms.fullname" . }}
+                  key: password
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: librenms-config
+              mountPath: /opt/librenms/config.d
+            - name: php7-fpm-config
+              mountPath: /etc/php7/php-fpm.d/www.conf
+              subPath: www.conf
+            - name: init-script
+              mountPath: /media
+      volumes:
+        - name: librenms-config
+          configMap:
+            name: {{ include "librenms.fullname" . }}
+        - name: nginx-config
+          configMap:
+            name: {{ printf "%s-%s" (include "librenms.fullname" . ) "nginx" }}
+        - name: php7-fpm-config
+          configMap:
+            name: {{ printf "%s-%s" (include "librenms.fullname" . ) "php7-fpm" }}
+        - name: init-script
+          configMap:
+            name: {{ printf "%s-%s" (include "librenms.fullname" . ) "init" }}
+            defaultMode: 0777
+
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

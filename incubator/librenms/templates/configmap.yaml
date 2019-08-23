@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "librenms.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ template "librenms.name" . }}
+    helm.sh/chart: {{ template "librenms.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+data:
+  database.php: |-
+{{ tpl (.Files.Get "files/database.php") . | indent 4 }}
+  directories.php: |-
+{{ tpl (.Files.Get "files/directories.php") . | indent 4 }}
