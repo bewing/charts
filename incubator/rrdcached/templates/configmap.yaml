@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "rrdcached.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "rrdcached.name" . }}
+    helm.sh/chart: {{ template "rrdcached.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+data:
+  TZ: {{ .Values.tz | quote }}
+  LOG_LEVEL: {{ .Values.logLevel | quote }}
+  WRITE_TIMEOUT: {{ .Values.writeTimeout | quote }}
+  WRITE_JITTER: {{ .Values.writeJitter | quote }}
+  WRITE_THREADS: {{ .Values.writeThreads | quote }}
+  SLUSH_DEAD_DATA_INTERVAL: {{ .Values.flushInterval | quote }}
