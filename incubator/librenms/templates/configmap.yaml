@@ -12,3 +12,9 @@ data:
 {{ tpl (.Files.Get "files/database.php") . | indent 4 }}
   directories.php: |-
 {{ tpl (.Files.Get "files/directories.php") . | indent 4 }}
+  {{- if .Values.rrdcached.enabled }}
+  rrdcached.php: |-
+    <?php
+    $config['rrdcached'] = {{ printf "%s:%d" (include "librenms.rrdcached.fullname" . ) (int64 .Values.rrdcached.service.port) | quote }};
+    $config['rrdtool_version'] = "1.7.0";
+  {{- end }}

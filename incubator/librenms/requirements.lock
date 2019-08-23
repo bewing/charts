@@ -2,5 +2,8 @@ dependencies:
 - name: mariadb
   repository: https://kubernetes-charts.storage.googleapis.com/
   version: 6.7.4
-digest: sha256:b7d62f687513a8099698014fed155afd66188ddb5d6907bd436f91e38fa2f825
-generated: 2019-08-16T10:07:48.396761-05:00
+- name: rrdcached
+  repository: file://../rrdcached
+  version: 0.1.0
+digest: sha256:1eaf69f1b11cb86908790ffcf1a4f52b977b1d9db5601f6fdb693245514b1851
+generated: 2019-08-23T16:05:36.9309003-05:00

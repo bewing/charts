@@ -3,3 +3,7 @@ dependencies:
     repository: https://kubernetes-charts.storage.googleapis.com/
     version: 6.7.4
     condition: mariadb.enabled
+  - name: rrdcached
+    repository: "file://../rrdcached"
+    version: 0.1.0
+    condition: rrdcached.enabled

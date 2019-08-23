@@ -40,6 +40,9 @@ poller:
   distributed:
     enabled: false
 
+rrdcached:
+  enabled: true
+
 externalDatabase:
   host:
   port: 3306
