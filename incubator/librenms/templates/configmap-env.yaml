@@ -19,3 +19,5 @@ data:
   DB_USER: {{ .Values.mariadb.db.user | quote }}
   DB_NAME: {{ .Values.externalDatabase.name | quote }}
   {{- end }}
+  REDIS_HOST: {{ (include "librenms.redis.fullname" .) | quote }}
+  REDIS_PORT: {{ .Values.redis.redisPort | quote }}

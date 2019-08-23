@@ -34,6 +34,11 @@ Create chart name and version as used by the chart label.
 {{- define "librenms.mariadb.fullname" -}}
 {{- printf "%s-%s" .Release.Name "mariadb" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+
 {{- define "librenms.rrdcached.fullname" -}}
 {{- printf "%s-%s" .Release.Name "rrdcached" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{- define "librenms.redis.fullname" -}}
+{{- printf "%s-%s" .Release.Name "redis" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}

@@ -33,6 +33,11 @@ gui:
     memoryLimit: 256M
 
 poller:
+  replicaCount: 1
+  image:
+    repository: librenms/librenms
+    tag: "1.54"
+    pullPolicy: IfNotPresent
   threads: 16
   interval: 5
   discovery: true
@@ -42,6 +47,11 @@ poller:
 
 rrdcached:
   enabled: true
+
+redis:
+  enabled: true
+  cluster:
+    enabled: false
 
 externalDatabase:
   host:

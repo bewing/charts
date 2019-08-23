@@ -7,3 +7,7 @@ dependencies:
     repository: "file://../rrdcached"
     version: 0.1.0
     condition: rrdcached.enabled
+  - name: redis
+    repository: https://kubernetes-charts.storage.googleapis.com/
+    version: 9.1.2
+    condition: redis.enabled

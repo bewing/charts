@@ -5,5 +5,8 @@ dependencies:
 - name: rrdcached
   repository: file://../rrdcached
   version: 0.1.0
-digest: sha256:1eaf69f1b11cb86908790ffcf1a4f52b977b1d9db5601f6fdb693245514b1851
-generated: 2019-08-23T16:05:36.9309003-05:00
+- name: redis
+  repository: https://kubernetes-charts.storage.googleapis.com/
+  version: 9.1.2
+digest: sha256:8cbc0a50305ad0bb736ed2a881260d959997d81e94d6e458912423390c190569
+generated: 2019-08-23T17:05:07.3635774-05:00
