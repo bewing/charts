@@ -48,6 +48,10 @@ spec:
                 secretKeyRef:
                   name: {{ template "librenms.redis.fullname" . }}
                   key: redis-password
+            - name: NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.uid
           volumeMounts:
             - name: librenms-config
               mountPath: /opt/librenms/config.d

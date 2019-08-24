@@ -52,6 +52,9 @@ redis:
   enabled: true
   cluster:
     enabled: false
+  master:
+    persistence:
+      enabled: false
 
 externalDatabase:
   host:
