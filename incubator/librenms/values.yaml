@@ -10,6 +10,7 @@ uid: 1000
 gid: 1000
 
 gui:
+  enabled: true
   replicaCount: 1
 
   username: librenms
@@ -33,6 +34,7 @@ gui:
     memoryLimit: 256M
 
 poller:
+  enabled: true
   replicaCount: 1
   image:
     repository: librenms/librenms
@@ -42,11 +44,17 @@ poller:
   interval: 5
   discovery: true
   daily:
-  distributed:
-    enabled: false
+
+externalRrdcached:
+  host:
+  port:
 
 rrdcached:
   enabled: true
+
+externalRedis:
+  host:
+  port:
 
 redis:
   enabled: true

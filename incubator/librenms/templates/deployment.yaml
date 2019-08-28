@@ -1,3 +1,4 @@
+{{- if .Values.gui.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -19,6 +20,45 @@ spec:
         app.kubernetes.io/name: {{ include "librenms.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
+      initContainers:
+        - name: init
+          image: {{ printf "%s:%s" .Values.gui.php7fpm.image.repository .Values.gui.php7fpm.image.tag }}
+          imagePullPolicy: {{ .Values.gui.php7fpm.image.pullPolicy }}
+          command: ["/media/init.sh"]
+          envFrom:
+            - configMapRef:
+                name: {{ printf "%s-%s" (include "librenms.fullname" . ) "env" }}
+          env:
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.mariadb.enabled }}
+                  name: {{ template "librenms.mariadb.fullname" . }}
+                  {{- else }}
+                  name: {{ .Values.externalDatabase.password }}
+                  {{ end }}
+                  key: mariadb-password
+            - name: GUI_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ printf "%s-%s" (include "librenms.fullname" . ) "init" }}
+                  key: username
+            - name: GUI_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "librenms.fullname" . }}
+                  key: password
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: librenms-config
+              mountPath: /opt/librenms/config.d/database.php
+              subPath: database.php
+            - name: php7-fpm-config
+              mountPath: /etc/php7/php-fpm.d/www.conf
+              subPath: www.conf
+            - name: init-script
+              mountPath: /media
       containers:
         - name: {{ printf "%s-%s" .Chart.Name "nginx" }}
           image: {{ printf "%s:%s" .Values.gui.nginx.image.repository .Values.gui.nginx.image.tag | quote }}
@@ -79,44 +119,7 @@ spec:
             - name: php7-fpm-config
               mountPath: /etc/php7/php-fpm.d/www.conf
               subPath: www.conf
-      initContainers:
-        - name: init
-          image: {{ printf "%s:%s" .Values.gui.php7fpm.image.repository .Values.gui.php7fpm.image.tag }}
-          imagePullPolicy: {{ .Values.gui.php7fpm.image.pullPolicy }}
-          command: ["/media/init.sh"]
-          envFrom:
-            - configMapRef:
-                name: {{ printf "%s-%s" (include "librenms.fullname" . ) "env" }}
-          env:
-            - name: DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  {{- if .Values.mariadb.enabled }}
-                  name: {{ template "librenms.mariadb.fullname" . }}
-                  {{- else }}
-                  name: {{ .Values.externalDatabase.password }}
-                  {{ end }}
-                  key: mariadb-password
-            - name: GUI_USERNAME
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ printf "%s-%s" (include "librenms.fullname" . ) "init" }}
-                  key: username
-            - name: GUI_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ template "librenms.fullname" . }}
-                  key: password
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-          volumeMounts:
-            - name: librenms-config
-              mountPath: /opt/librenms/config.d
-            - name: php7-fpm-config
-              mountPath: /etc/php7/php-fpm.d/www.conf
-              subPath: www.conf
-            - name: init-script
-              mountPath: /media
+
       volumes:
         - name: librenms-config
           configMap:
@@ -144,3 +147,4 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}
+{{- end }}

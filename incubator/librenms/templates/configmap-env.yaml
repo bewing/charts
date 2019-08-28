@@ -19,5 +19,12 @@ data:
   DB_USER: {{ .Values.mariadb.db.user | quote }}
   DB_NAME: {{ .Values.externalDatabase.name | quote }}
   {{- end }}
-  REDIS_HOST: {{ (include "librenms.redis.fullname" .) | quote }}
+  {{- if .Values.redis.enabled }}
+  REDIS_HOST: {{ printf "%s-master" (include "librenms.redis.fullname" .) | quote }}
   REDIS_PORT: {{ .Values.redis.redisPort | quote }}
+  {{- else }}
+  REDIS_HOST: {{ .Values.externalRedis.host | quote }}
+  REDIS_PORT: {{ .Values.externalRedis.port | quote }}
+
+  {{- end }}
+
