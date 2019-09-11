@@ -12,7 +12,5 @@ data:
 {{ tpl (.Files.Get "files/database.php") . | indent 4 }}
   rrdcached.php: |-
 {{ tpl (.Files.Get "files/rrdcached.php" ) . | indent 4 }}
-  {{- if .Values.poller.enabled }}
-  poller.php: |-
-{{ tpl (.Files.Get "files/poller.php") . | indent 4 }}
-  {{- end }}
+  extra.php: |-
+{{ .Values.extraConfig | indent 4 }}

@@ -11,20 +11,43 @@ data:
   {{- if .Values.mariadb.enabled }}
   DB_HOST: {{ (include "librenms.mariadb.fullname" .) | quote }}
   DB_PORT: {{ .Values.mariadb.service.port | quote }}
-  DB_USER: {{ .Values.mariadb.db.user | quote }}
-  DB_NAME: {{ .Values.mariadb.db.name | quote }}
-  {{- else }}
-  DB_HOST: {{ .Values.externalDatabase.host | quote }}
-  DB_PORT: {{ .Values.externalDatabase.port | quote }}
-  DB_USER: {{ .Values.mariadb.db.user | quote }}
-  DB_NAME: {{ .Values.externalDatabase.name | quote }}
+  DB_USERNAME: {{ .Values.mariadb.db.user | quote }}
+  DB_DATABASE: {{ .Values.mariadb.db.name | quote }}
+  {{- if .Values.mariadb.replication.enabled }}
+  DB_SLAVE: {{ printf "%s-%s" (include "librenms.mariadb.fullname" .) "slave" | quote }}
+  DB_SLAVE_PORT: {{ .Values.mariadb.service.port | quote }}
+  DB_SLAVE_USERNAME: {{ .Values.mariadb.db.user | quote }}
+  DB_SLAVE_DATABASE: {{ .Values.mariadb.db.name | quote }}
+  DB_SLAVE_STICKY: "1"
   {{- end }}
-  {{- if .Values.redis.enabled }}
-  REDIS_HOST: {{ printf "%s-master" (include "librenms.redis.fullname" .) | quote }}
-  REDIS_PORT: {{ .Values.redis.redisPort | quote }}
+  {{- else }}
+  DB_HOST: {{ .Values.externalDatabase.master.host | quote }}
+  DB_PORT: {{ .Values.externalDatabase.master.port | quote }}
+  DB_USERNAME: {{ .Values.externalDatabase.user | quote }}
+  DB_DATABASE: {{ .Values.externalDatabase.name | quote }}
+  {{- if .Values.externalDatabase.slave.enabled }}
+  DB_SLAVE: {{ .Values.externalDatabase.slave.host | quote }}
+  DB_SLAVE_PORT: {{ .Values.externalDatabase.slave.port | quote }}
+  DB_SLAVE_USERNAME: {{ .Values.externalDatabase.user | quote }}
+  DB_SLAVE_DATABASE: {{ .Values.externalDatabase.name | quote }}
+  DB_SLAVE_STICKY: "1"
+  {{- end }}
+  {{- end }}
+  {{- if .Values.externalRedis.host }}
+  {{- if .Values.externalRedis.sentinel.enabled }}
+  REDIS_SENTINEL: {{ printf "%s:%d" .Values.externalRedis.host (int64 .Values.externalRedis.port) | quote }}
+  REDIS_SENTINEL_SERVICE: {{ .Values.externalRedis.sentinel.serviceName }}
   {{- else }}
   REDIS_HOST: {{ .Values.externalRedis.host | quote }}
-  REDIS_PORT: {{ .Values.externalRedis.port | quote }}
-
+  REDIS_PORT: {{ default "6379" .Values.externalRedis.port | quote }}
+  {{- end }}
+  {{- else if .Values.redis.enabled }}
+  {{- if .Values.redis.sentinel.enabled }}
+  REDIS_SENTINEL: {{ printf "%s-headless:%d" (include "librenms.redis.fullname" .) (int64 .Values.redis.sentinel.port) | quote }}
+  REDIS_SENTINEL_SERVICE: {{ .Values.redis.sentinel.masterSet }}
+  {{- else }}
+  REDIS_HOST: {{ printf "%s-master" (include "librenms.redis.fullname" .) | quote }}
+  REDIS_PORT: {{ .Values.redis.redisPort | quote }}
+  {{- end }}
   {{- end }}
 

@@ -43,7 +43,11 @@ poller:
   threads: 16
   interval: 5
   discovery: true
+  group: 0
   daily:
+
+# Additional PHP configuration for LibreNMS (poller settings, RRA values, etc
+extraConfig: |
 
 externalRrdcached:
   host:
@@ -55,21 +59,36 @@ rrdcached:
 externalRedis:
   host:
   port:
+  sentinel:
+    enabled: false
+    serviceName:
 
 redis:
-  enabled: true
+  clusterDomain:
+  enabled: false
   cluster:
     enabled: false
   master:
     persistence:
       enabled: false
+  slave:
+    persistence:
+      enabled: false
+  sentinel:
+    enabled: false
 
 externalDatabase:
-  host:
-  port: 3306
+  name: librenms
   user: librenms
-  password: 
-  database: librenms
+  master:
+    host:
+    port: 3306
+    password:
+  slave:
+    enabled: false
+    host:
+    port: 3306
+    password:
 
 mariadb:
   ## Whether to deploy a mariadb server to satisfy the applications database requirements.
