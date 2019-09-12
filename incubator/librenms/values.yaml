@@ -5,10 +5,6 @@
 nameOverride: ""
 fullnameOverride: ""
 
-tz: UTC
-uid: 1000
-gid: 1000
-
 gui:
   enabled: true
   replicaCount: 1
@@ -40,9 +36,6 @@ poller:
     repository: librenms/librenms
     tag: "1.54"
     pullPolicy: IfNotPresent
-  threads: 16
-  interval: 5
-  discovery: true
   group: 0
   daily:
 
@@ -67,7 +60,7 @@ redis:
   clusterDomain:
   enabled: false
   cluster:
-    enabled: false
+    enabled: true
   master:
     persistence:
       enabled: false
@@ -75,7 +68,7 @@ redis:
     persistence:
       enabled: false
   sentinel:
-    enabled: false
+    enabled: true
 
 externalDatabase:
   name: librenms
@@ -93,6 +86,7 @@ externalDatabase:
 mariadb:
   ## Whether to deploy a mariadb server to satisfy the applications database requirements.
   ## To use an external database set this to false and configure the externalDatabase parameters
+  ## config is overridden to set coresrver collation set for librenms
   enabled: true
   replication:
     enabled: false
@@ -105,6 +99,51 @@ mariadb:
       storageClass: "-"
       accessMode: ReadWriteOnce
       size: 8Gi
+    config: |-
+      [mysqld]
+      skip-name-resolve
+      explicit_defaults_for_timestamp
+      basedir=/opt/bitnami/mariadb
+      port=3306
+      socket=/opt/bitnami/mariadb/tmp/mysql.sock
+      tmpdir=/opt/bitnami/mariadb/tmp
+      max_allowed_packet=16M
+      bind-address=0.0.0.0
+      pid-file=/opt/bitnami/mariadb/tmp/mysqld.pid
+      log-error=/opt/bitnami/mariadb/logs/mysqld.log
+      character-set-server=UTF8
+      collation-server=utf8_unicode_ci
+      [client]
+      port=3306
+      socket=/opt/bitnami/mariadb/tmp/mysql.sock
+      default-character-set=UTF8
+      [manager]
+      port=3306
+      socket=/opt/bitnami/mariadb/tmp/mysql.sock
+      pid-file=/opt/bitnami/mariadb/tmp/mysqld.pid
+  slave:
+    config: |-
+      [mysqld]
+      skip-name-resolve
+      explicit_defaults_for_timestamp
+      basedir=/opt/bitnami/mariadb
+      port=3306
+      socket=/opt/bitnami/mariadb/tmp/mysql.sock
+      tmpdir=/opt/bitnami/mariadb/tmp
+      max_allowed_packet=16M
+      bind-address=0.0.0.0
+      pid-file=/opt/bitnami/mariadb/tmp/mysqld.pid
+      log-error=/opt/bitnami/mariadb/logs/mysqld.log
+      character-set-server=UTF8
+      collation-server=utf8_unicode_ci
+      [client]
+      port=3306
+      socket=/opt/bitnami/mariadb/tmp/mysql.sock
+      default-character-set=UTF8
+      [manager]
+      port=3306
+      socket=/opt/bitnami/mariadb/tmp/mysql.sock
+      pid-file=/opt/bitnami/mariadb/tmp/mysqld.pid
 
 service:
   type: ClusterIP
