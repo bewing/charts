@@ -2,6 +2,9 @@
 $config['install_dir'] = '/opt/librenms';
 $config['log_dir'] = '/tmp';
 $config['rrd_dir'] = '/opt/librenms/rrd';
+$config['user'] = "librenms";
+$config['fping6'] = '/usr/sbin/fping';
+$config['update'] = 0;
 {{- if .Values.mariadb.enabled }}
 $config['db_host'] = {{ (include "librenms.mariadb.fullname" .) | quote }};
 $config['db_port'] = {{ .Values.mariadb.service.port }};
